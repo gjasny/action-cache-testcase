@@ -1,0 +1,27 @@
+name: Continuous Integration
+on: [push]
+
+jobs:
+  cmake:
+    name: CMake ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04, windows-2019]
+
+    steps:
+      - name: Mount vcpkg cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            %LOCALAPPDATA%\vcpkg\archives
+            ~/.cache/vcpkg/archives
+          key: vcpkg-${{ matrix.os }}
+
+      - name: Install vcpkg dependencies
+        run: vcpkg install benchmark
+
+      - name: "Dump localappdata"
+        if: runner.os == 'Windows'
+        run: dir -r ${Env:LOCALAPPDATA}\vcpkg\archives
